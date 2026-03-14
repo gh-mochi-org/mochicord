@@ -1,0 +1,8 @@
+[package]
+name = "mochicord-config"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+dotenvy = "0.15.7"
+figment = { version = "0.10.19", features = ["toml", "env"] }

@@ -1,0 +1,14 @@
+[package]
+name = "mochicord-gateway"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = { version = "0.8.8", features = ["ws", "macros"] }
+ed25519-dalek = { version = "2.2.0", features = ["rand_core"] }
+hmac = "0.12.1"
+jsonwebtoken = "10.3.0"
+sha2 = "0.10.9"
+tokio = { version = "1.50.0", features = ["full"] }
+tonic = { version = "0.14.5", features = ["transport", "tls-ring", "gzip"] }
+tower-http = { version = "0.6.8", features = ["cors", "trace", "compression-gzip"] }

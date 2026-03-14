@@ -1,0 +1,140 @@
+version: "3.9"
+
+networks:
+  mochicord-dev:
+    driver: bridge
+
+volumes:
+  surreal_data:
+  redis_data:
+  grafana_data:
+  loki_data:
+  tempo_data:
+  minio_data:
+
+services:
+
+  # ── SurrealDB ─────────────────────────────────────────────────
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    restart: unless-stopped
+    command: >
+      start --log debug --user root --pass localdevpassword
+      file:/data/db.db
+    ports:
+      - "5984:5984"
+    volumes:
+      - surreal_data:/data
+    networks:
+      - mochicord-dev
+    healthcheck:
+      test: ["CMD", "/surreal", "isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 8s
+
+  # ── Redis ──────────────────────────────────────────────────────
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: >
+      redis-server --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - mochicord-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ── MinIO — local R2 substitute ───────────────────────────────
+  # Use this in dev instead of hitting real R2.
+  # aws-sdk-s3 in storage-crate points to http://localhost:9000.
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console → http://localhost:9001
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    networks:
+      - mochicord-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── OpenTelemetry Collector ────────────────────────────────────
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    restart: unless-stopped
+    volumes:
+      - ./infra/otel/config.yaml:/etc/otel/config.yaml:ro
+    command: ["--config=/etc/otel/config.yaml"]
+    ports:
+      - "4317:4317"   # gRPC OTLP  ← all services send traces here
+      - "4318:4318"   # HTTP OTLP
+      - "8888:8888"   # collector self-metrics
+    networks:
+      - mochicord-dev
+    depends_on:
+      - tempo
+      - loki
+
+  # ── Tempo (distributed traces) ────────────────────────────────
+  tempo:
+    image: grafana/tempo:latest
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo/config.yaml"]
+    volumes:
+      - ./infra/tempo/config.yaml:/etc/tempo/config.yaml:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+    networks:
+      - mochicord-dev
+
+  # ── Loki (logs) ───────────────────────────────────────────────
+  loki:
+    image: grafana/loki:latest
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/config.yaml"]
+    volumes:
+      - ./infra/loki/config.yaml:/etc/loki/config.yaml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - mochicord-dev
+
+  # ── Grafana ───────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_FEATURE_TOGGLES_ENABLE: "traceqlEditor"
+    networks:
+      - mochicord-dev
+    depends_on:
+      - loki
+      - tempo

@@ -1,0 +1,43 @@
+# Rust
+/target/
+**/*.rs.bk
+
+
+# Env
+.env
+*.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Proto generated (rebuilt from .proto files on cargo build)
+crates/proto/src/generated/
+
+# Infra secrets / local overrides
+infra/grafana/provisioning/datasources/*.yaml
+!infra/grafana/provisioning/datasources/.gitkeep
+
+# MinIO local data (if accidentally mounted in repo dir)
+data/
+
+# OS
+Thumbs.db
+
+# Flutter / Dart
+mobile/build/
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/pubspec.lock
+*.g.dart
+
+# Bun / Node
+node_modules/
+bun.lock
+dist/
+.cache/
+

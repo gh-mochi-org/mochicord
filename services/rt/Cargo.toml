@@ -1,0 +1,13 @@
+[package]
+name = "mochicord-rt"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = { version = "0.8.8", features = ["ws", "macros"] }
+quinn = { version = "0.11.9", features = ["ring"] }
+rcgen = "0.14.7"
+rustls = "0.23.37"
+tokio = { version = "1.50.0", features = ["full"] }
+tonic = { version = "0.14.5", features = ["transport", "tls-ring", "gzip"] }
+tonic-health = "0.14.5"

@@ -1,0 +1,13 @@
+[package]
+name = "mochicord-worker"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aws-config = "1.8.15"
+aws-sdk-s3 = "1.126.0"
+image = "0.25.10"
+kamadak-exif = "0.6.1"
+lettre = { version = "0.11.19", features = ["tokio1-native-tls"] }
+tokio = { version = "1.50.0", features = ["full"] }
+tonic = { version = "0.14.5", features = ["transport", "tls-ring", "gzip"] }

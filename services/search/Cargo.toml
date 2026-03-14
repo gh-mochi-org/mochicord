@@ -1,0 +1,10 @@
+[package]
+name = "mochicord-search"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.8"
+tantivy = "0.25.0"
+tokio = { version = "1.50.0", features = ["full"] }
+tonic = { version = "0.14.5", features = ["transport", "tls-ring", "gzip"] }

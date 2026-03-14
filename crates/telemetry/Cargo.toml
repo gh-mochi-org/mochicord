@@ -1,0 +1,12 @@
+[package]
+name = "mochicord-telemetry"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+opentelemetry = "0.31.0"
+opentelemetry-otlp = { version = "0.31.0", features = ["trace", "tonic"] }
+opentelemetry_sdk = { version = "0.31.0", features = ["rt-tokio"] }
+tracing = "0.1.44"
+tracing-opentelemetry = "0.32.1"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"] }

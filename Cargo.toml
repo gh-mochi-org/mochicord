@@ -1,0 +1,30 @@
+[workspace]
+resolver = "2"
+members = [
+  "services/gateway",
+  "services/api",
+  "services/rt",
+  "services/media",
+  "services/auth",
+  "services/worker",
+  "services/search",
+  "services/proxy",
+  "services/bot-runtime",
+  "services/federation",
+  "services/payments",
+  "crates/common",
+  "crates/config",
+  "crates/telemetry",
+  "crates/db",
+  "crates/cache",
+  "crates/proto",
+  "crates/crypto",
+  "crates/antidox",
+  "crates/storage",
+  "mochicord-app/src-tauri"
+, "mochicord-tui-app"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["idotconfig", "gh-mochi"]
