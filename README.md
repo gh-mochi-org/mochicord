@@ -1,1 +1,1 @@
-# mochicord
+# Mochicord!!! (something good coming soon)
